@@ -12,13 +12,3 @@ A tiny, intentionally vulnerable Node app for learning NoSQL / CQL injection. Ru
 * `POST /level2/login` — passes request body directly to `User.find()`.
 * `POST /level3/login` — string‑concatenated CQL query.
 
-## Purpose
-
-Show how unsafe query construction lets attackers bypass auth and read sensitive fields (e.g., `secret`).
-
-## Quick fixes
-
-* Remove `$where`; use standard query objects.
-* Validate / whitelist inputs and reject query operators from user input.
-* Use parameterized/prepared statements for Cassandra and safe drivers for MongoDB.
-
