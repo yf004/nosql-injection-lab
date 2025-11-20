@@ -1,0 +1,26 @@
+{
+    "sourceFile": "docker-compose.yml",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 2,
+            "patches": [
+                {
+                    "date": 1763634975494,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1763635353464,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,6 +1,4 @@\n-version: '3.9'\r\n-\r\n services:\r\n   app:\r\n     build: .\r\n     container_name: node_app\r\n"
+                },
+                {
+                    "date": 1763636774294,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -17,8 +17,13 @@\n     ports:\r\n       - \"27017:27017\"\r\n     volumes:\r\n       - mongo-data:/data/db\r\n+    healthcheck:\r\n+      test: [\"CMD\", \"mongo\", \"--eval\", \"db.adminCommand('ping')\"]\r\n+      interval: 5s\r\n+      timeout: 5s\r\n+      retries: 5\r\n \r\n   cassandra:\r\n     image: cassandra:4.1\r\n     container_name: cassandra\r\n@@ -29,8 +34,13 @@\n       - CASSANDRA_DC=datacenter1\r\n       - CASSANDRA_RACK=rack1\r\n     volumes:\r\n       - cassandra-data:/var/lib/cassandra\r\n+    healthcheck:\r\n+      test: [\"CMD\", \"cqlsh\", \"-e\", \"describe keyspaces\"]\r\n+      interval: 10s\r\n+      timeout: 10s\r\n+      retries: 5\r\n \r\n volumes:\r\n   mongo-data:\r\n   cassandra-data:\r\n"
+                }
+            ],
+            "date": 1763634975494,
+            "name": "Commit-0",
+            "content": "version: '3.9'\r\n\r\nservices:\r\n  app:\r\n    build: .\r\n    container_name: node_app\r\n    ports:\r\n      - \"3000:3000\"\r\n    depends_on:\r\n      - mongo\r\n      - cassandra\r\n    environment:\r\n      - MONGO_URI=mongodb://mongo:27017/testdb\r\n      - CASSANDRA_CONTACT_POINTS=cassandra:9042\r\n\r\n  mongo:\r\n    image: mongo:6.0\r\n    container_name: mongo\r\n    ports:\r\n      - \"27017:27017\"\r\n    volumes:\r\n      - mongo-data:/data/db\r\n\r\n  cassandra:\r\n    image: cassandra:4.1\r\n    container_name: cassandra\r\n    ports:\r\n      - \"9042:9042\"\r\n    environment:\r\n      - CASSANDRA_CLUSTER_NAME=TestCluster\r\n      - CASSANDRA_DC=datacenter1\r\n      - CASSANDRA_RACK=rack1\r\n    volumes:\r\n      - cassandra-data:/var/lib/cassandra\r\n\r\nvolumes:\r\n  mongo-data:\r\n  cassandra-data:\r\n"
+        }
+    ]
+}

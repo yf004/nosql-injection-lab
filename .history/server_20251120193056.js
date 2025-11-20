@@ -55,9 +55,9 @@ async function initializeCassandraData() {
     `);
     await cassandraClient.execute('TRUNCATE users');
     const queries = [
-        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['admin', 'admin_testing', 'admin', 'FLAG{n0sql_byp455}'] },
-        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['user1', 'password1', 'user', 'nop'] },
-        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['test', 'test', 'user', 'nop'] }
+        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['admin', 'admin_testing', 'admin', 'CTF{n0sql_byp455}'] },
+        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['user1', 'password1', 'user', 'Nothing to see here'] },
+        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['test', 'test', 'user', 'Regular user secret'] }
     ];
     for (const { query, params } of queries) {
         await cassandraClient.execute(query, params, { prepare: true });

@@ -1,0 +1,22 @@
+{
+    "sourceFile": "README.md",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1763638206634,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1763638239174,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -33,9 +33,8 @@\n ```\r\n \r\n Login endpoints:\r\n \r\n-\r\n * POST /level1/login — uses {$where: \"...\"} (string‑interpolated JS).\r\n * POST /level2/login — passes request body directly to User.find().\r\n * POST /level3/login — string‑concatenated CQL query.\r\n \r\n@@ -45,11 +44,11 @@\n ## Initial Data\r\n \r\n | Username | Password      | Role  | Secret                    |\r\n | -------- | ------------- | ----- | ------------------------- |\r\n-| admin    | admin_testing | admin | CTF{n0sql_byp455}         |\r\n-| user1    | password1     | user  | No flag for regular users |\r\n-| test     | test          | user  | Still no flag             |\r\n+| admin    | admin_testing | admin | FLAG{n0sql_byp455}        |\r\n+| user1    | password1     | user  | nop                       |\r\n+| test     | test          | user  | nop                       |\r\n \r\n ---\r\n \r\n ## Testing\r\n"
+                }
+            ],
+            "date": 1763638206634,
+            "name": "Commit-0",
+            "content": "# NoSQL Injection Lab\r\nA tiny, intentionally vulnerable Node app for NoSQL injection. \r\n\r\n## Setup\r\n\r\n1. Clone the repo:\r\n\r\n```bash\r\ngit clone https://github.com/yourusername/nosql-injection-lab.git\r\ncd nosql-injection-lab\r\n```\r\n\r\n2. Run with Docker Compose:\r\n\r\n```bash\r\ndocker-compose up --build\r\n```\r\n\r\n---\r\n\r\n## Services\r\n\r\n* `mongo:6.0` – MongoDB, port 27017\r\n* `cassandra:4.1` – Cassandra, port 9042\r\n* `app` – Node.js lab, port 3000\r\n\r\n---\r\n\r\nAccess in browser:\r\n\r\n```\r\nhttp://localhost:3000\r\n```\r\n\r\nLogin endpoints:\r\n\r\n\r\n* POST /level1/login — uses {$where: \"...\"} (string‑interpolated JS).\r\n* POST /level2/login — passes request body directly to User.find().\r\n* POST /level3/login — string‑concatenated CQL query.\r\n\r\n\r\n---\r\n\r\n## Initial Data\r\n\r\n| Username | Password      | Role  | Secret                    |\r\n| -------- | ------------- | ----- | ------------------------- |\r\n| admin    | admin_testing | admin | CTF{n0sql_byp455}         |\r\n| user1    | password1     | user  | No flag for regular users |\r\n| test     | test          | user  | Still no flag             |\r\n\r\n---\r\n\r\n## Testing\r\n\r\nSolutions for each level (with some explanation) can be found in the **`testing`** folder.\r\n"
+        }
+    ]
+}

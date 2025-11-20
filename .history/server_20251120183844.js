@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const path = require('path');
 const cassandra = require('cassandra-driver');
-const waitPort = require('wait-port');
 
 const app = express();
 const PORT = 3000;
@@ -29,13 +28,12 @@ const userSchema = new mongoose.Schema({
 
 const UserModel = mongoose.model('User', userSchema);
 
-
 async function initializeMongoData() {
     await UserModel.deleteMany({});
     await UserModel.create([
-        { username: 'admin', password: 'admin_testing', role: 'admin', secret: 'FLAG{n0sql_byp455}' },
-        { username: 'user1', password: 'password1', role: 'user', secret: 'nop' },
-        { username: 'test', password: 'test', role: 'user', secret: 'nop' }
+        { username: 'admin', password: 'admin_testing', role: 'admin', secret: 'CTF{n0sql_byp455}' },
+        { username: 'user1', password: 'password1', role: 'user', secret: 'No flag for regular users' },
+        { username: 'test', password: 'test', role: 'user', secret: 'Still no flag' }
     ]);
 }
 
@@ -55,30 +53,22 @@ async function initializeCassandraData() {
     `);
     await cassandraClient.execute('TRUNCATE users');
     const queries = [
-        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['admin', 'admin_testing', 'admin', 'FLAG{n0sql_byp455}'] },
-        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['user1', 'password1', 'user', 'nop'] },
-        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['test', 'test', 'user', 'nop'] }
+        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['admin', 'admin_testing', 'admin', 'CTF{n0sql_byp455}'] },
+        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['user1', 'password1', 'user', 'Nothing to see here'] },
+        { query: 'INSERT INTO users (username, password, role, secret) VALUES (?, ?, ?, ?)', params: ['test', 'test', 'user', 'Regular user secret'] }
     ];
     for (const { query, params } of queries) {
         await cassandraClient.execute(query, params, { prepare: true });
     }
 }
 
-
-async function startServer() {
-    await waitPort({ host: 'mongo', port: 27017 });
-    await waitPort({ host: 'cassandra', port: 9042 });
-
-    await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connection.once('open', async () => {
     await initializeMongoData();
-
     await cassandraClient.connect();
     await initializeCassandraData();
-
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-}
-
-startServer().catch(err => console.error(err));
+});
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/level1', (req, res) => res.sendFile(path.join(__dirname, 'public', 'level1.html')));
