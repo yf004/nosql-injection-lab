@@ -199,36 +199,73 @@ app.get('/level5', (req, res) => res.sendFile(path.join(__dirname, 'public', 'le
 
 app.post('/level1/login', async (req, res) => {
     const { username, password } = req.body;
-    const query = { $where: `this.username == '${username}' && this.password == '${password}'` };
-    const users = await UserModel.find(query);
-    if (users.length > 0) {
-        res.json({ success: true, message: 'Login successful', secret: users[0].secret });
-    } else {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
+    try{
+        const query = { $where: `this.username == '${username}' && this.password == '${password}'` };
+        const users = await UserModel.find(query);
+        if (users.length > 0) {
+            res.json({ success: true, message: 'Login successful', secret: users[0].secret });
+        } else {
+            res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
 app.post('/level2/login', async (req, res) => {
     const { username, password } = req.body;
-    const query = { $where: `(this.username == '${username}') && (this.password == '${password}')`};
-    const users = await UserModel.find(query);
-    if (users.length > 0) {
-        res.json({ success: true, message: 'Login successful', secret: users[0].secret });
-    } else {
-        res.status(401).json({ success: false, message: 'Invalid credentials' });
+    try {
+        const query = { $where: `(this.username == '${username}') && (this.password == '${password}')`};
+        const users = await UserModel.find(query);
+        if (users.length > 0) {
+            res.json({ success: true, message: 'Login successful', secret: users[0].secret });
+        } else {
+            res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
-app.post('/level3/login', async (req, res) => {
-    const users = await UserModel.find(req.body);
-    if (users.length > 0) {
-        res.json({ success: true, message: 'Login successful', secret: users[0].secret });
+app.post("/level3/login", async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+    const user = await UserModel.findOne({
+        username:
+        username.startsWith("{") && username.endsWith("}")
+            ? JSON.parse(username)
+            : username,
+        password:
+        password.startsWith("{") && password.endsWith("}")
+            ? JSON.parse(password)
+            : password,
+    });
+
+    if (user) {
+        res.json({ success: true, message: 'Login successful', secret: user.secret });
     } else {
         res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
 app.post('/level4/login', async (req, res) => {
+    const users = await UserModel.find(req.body);
+    try{
+        if (users.length > 0) {
+            res.json({ success: true, message: 'Login successful', secret: users[0].secret });
+        } else {
+            res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.post('/level5/login', async (req, res) => {
     const { username, password } = req.body;
     try {
         const result = await cassandraClient.execute(

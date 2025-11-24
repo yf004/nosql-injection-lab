@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <main class="container" role="main">
+        <h1 style="justify-self: center;">Login</h1>
+        <p>Try to sign in as admin</p>
+
+        <form id="loginForm" autocomplete="off">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" placeholder="username" required />
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" placeholder="password" required />
+            </div>
+
+            <button class="btn" type="submit">Login</button>
+        </form>
+
+        <div id="result" aria-live="polite"></div>
+    </main>
+
+    <script>
+        const resultEl = document.getElementById('result');
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            resultEl.innerHTML = '';
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const resp = await fetch('/level4/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await resp.json();
+
+                const box = document.createElement('div');
+                box.className = 'result';
+
+                const title = document.createElement('div');
+                title.innerHTML = `<strong>${data.success ? 'SUCCESS!' : 'FAILED'}</strong>`;
+                title.className = data.success ? 'success' : 'failed';
+                box.appendChild(title);
+
+                const msg = document.createElement('div');
+                msg.innerHTML = `<pre>Message: ${data.message || ''}</pre>`;
+                box.appendChild(msg);
+
+                if (data.secret) {
+                    const secret = document.createElement('div');
+                    secret.innerHTML = `<pre>Secret: ${data.secret}</pre>`;
+                    box.appendChild(secret);
+                }
+
+                if (data.role) {
+                    const role = document.createElement('div');
+                    role.innerHTML = `<pre>Role: ${data.role}</pre>`;
+                    box.appendChild(role);
+                }
+
+                resultEl.appendChild(box);
+            } catch (err) {
+                resultEl.innerHTML = `<div class="result failed"><pre>Network error or invalid response</pre></div>`;
+            }
+        });
+    </script>
+</body>
+</html>
