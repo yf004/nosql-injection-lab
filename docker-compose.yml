@@ -1,15 +1,21 @@
 services:
   app:
     build: .
-    container_name: node_app
+    container_name: nosql-injection-lab
     ports:
       - "3000:3000"
     depends_on:
       - mongo
       - cassandra
+      - dynamodb-local
     environment:
       - MONGO_URI=mongodb://mongo:27017/testdb
       - CASSANDRA_CONTACT_POINTS=cassandra:9042
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - AWS_REGION=localhost
+      - AWS_ACCESS_KEY_ID=fake
+      - AWS_SECRET_ACCESS_KEY=fake
+      - NODE_ENV=development
 
   mongo:
     image: mongo:6.0
@@ -41,6 +47,22 @@ services:
       timeout: 10s
       retries: 5
 
+  # redis: 
+  #   image: redis:alpine
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ."
+    volumes:
+      - dynamodb-data:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+
 volumes:
   mongo-data:
   cassandra-data:
+  dynamodb-data:
