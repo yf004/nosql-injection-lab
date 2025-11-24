@@ -32,13 +32,6 @@ Access in browser:
 http://localhost:3000
 ```
 
-Login endpoints:
-
-* POST /level1/login — uses {$where: "..."} (string‑interpolated JS).
-* POST /level2/login — passes request body directly to User.find().
-* POST /level3/login — string‑concatenated CQL query.
-
-
 ---
 
 ## Initial Data
