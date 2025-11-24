@@ -22,20 +22,14 @@ const cassandraClient = new cassandra.Client({
 });
 
 AWS.config.update({
-  region: 'ap-southeast-1',
-  accessKeyId: 'nil',
-  secretAccessKey: 'nil'
-});
-
-app.use(express.json());
-
-// Configure DynamoDB
-AWS.config.update({
-  region: process.env.AWS_REGION || 'localhost',
+  region: 'localhost',
   endpoint: process.env.DYNAMODB_ENDPOINT || 'http://localhost:8000',
   accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'fake',
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'fake'
 });
+
+app.use(express.json());
+
 
 const dynamodb = new AWS.DynamoDB();
 const documentClient = new AWS.DynamoDB.DocumentClient();
