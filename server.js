@@ -7,6 +7,7 @@ const waitPort = require('wait-port');
 // const redis = require('redis'); 
 const AWS = require('aws-sdk');
 const app = express();
+const { MongoClient } = require("mongodb");
 const PORT = 3000;
 
 app.use(bodyParser.json());
@@ -34,6 +35,7 @@ app.use(express.json());
 const dynamodb = new AWS.DynamoDB();
 const documentClient = new AWS.DynamoDB.DocumentClient();
 const TABLE_NAME = 'users';
+let docsDB; 
 
 // const REDIS_URL = process.env.REDIS_URL || 'redis://redis:6379';
 // const redisClient = redis.createClient({
@@ -114,6 +116,51 @@ const userSchema = new mongoose.Schema({
 
 const UserModel = mongoose.model('User', userSchema);
 
+async function initMongoDbDocs() {
+    const client = new MongoClient(MONGO_URI);
+
+    await client.connect();
+    docsDB = client.db("testdocsDB");     
+
+    const col = docsDB.collection("documents");
+    await col.deleteMany({});
+
+    await col.insertMany([
+        { title: "public-report", content: "Welcome to the archive." },
+        { title: "meeting-log", content: "Team A met with stakeholders." },
+        { title: "research-draft", content: "Unfinished ideas." },
+        { title: "daily-update", content: "System running normally." },
+        { title: "travel-plan", content: "Trip schedule for conference." },
+        { title: "todo-list", content: "Buy milk, fix printer, email HR." },
+        { title: "maintenance-log", content: "Server patch completed." },
+        { title: "bugreport-2104", content: "CSS alignment issue on page." },
+
+        { title: "usernote-jason", content: "Remember to check backups." },
+        { title: "usernote-mary", content: "Lunch at 1pm tomorrow." },
+        { title: "usernote-kevin", content: "Draft the slides by Monday." },
+        { title: "thoughts-alice", content: "Should refactor the codebase." },
+        { title: "idea-dump", content: "Tiny brainstorming sketches." },
+
+        { title: "misc-scrap", content: "Old document. Discard later." },
+        { title: "archive-old-1", content: "Legacy asset – not important." },
+        { title: "archive-old-2", content: "Contains obsolete formats." },
+        { title: "random-text", content: "asdiu3y1b289y18y289yasyd" },
+        { title: "log-junk", content: "ERROR: null pointer LOL" },
+        { title: "config-notes", content: "Don't forget to restart service." },
+        { title: "draft-alpha", content: "v0.0.1 concept materials." },
+        { title: "draft-beta", content: "v0.0.2 placeholder notes." },
+        { title: "status-report", content: "Everything is nominal." },
+
+        { title: "tmp1", content: "temp file" },
+        { title: "tmp2", content: "temp file again" },
+        { title: "tmp3", content: "temp file thrice" },
+        { title: "notes-sept", content: "Meeting rescheduled to Friday." },
+        { title: "notes-oct", content: "Working on documentation." },
+        { title: "admin-notes", secret: "FLAG{n0sql_byp455}",
+          content: "If you're reading this, you bypassed the filter." }
+    ]);
+
+}
 
 async function initializeMongoData() {
     await UserModel.deleteMany({});
@@ -167,7 +214,6 @@ async function initializeCassandraData() {
     }
 }
 
-
 async function startServer() {
     await waitPort({ host: 'mongo', port: 27017 });
     await waitPort({ host: 'cassandra', port: 9042 });
@@ -175,6 +221,7 @@ async function startServer() {
 
     await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
     await initializeMongoData();
+    await initMongoDbDocs();
 
     await cassandraClient.connect();
     await initializeCassandraData();
@@ -195,6 +242,7 @@ app.get('/level2', (req, res) => res.sendFile(path.join(__dirname, 'public', 'le
 app.get('/level3', (req, res) => res.sendFile(path.join(__dirname, 'public', 'level3.html')));
 app.get('/level4', (req, res) => res.sendFile(path.join(__dirname, 'public', 'level4.html')));
 app.get('/level5', (req, res) => res.sendFile(path.join(__dirname, 'public', 'level5.html')));
+app.get('/level6', (req, res) => res.sendFile(path.join(__dirname, 'public', 'level6.html')));
 
 
 app.post('/level1/login', async (req, res) => {
@@ -278,5 +326,39 @@ app.post('/level5/login', async (req, res) => {
         }
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+});
+
+
+app.post("/level6/search", async (req, res) => {
+    const { query, projection } = req.body;
+
+    try {
+        const results = await docsDB.collection("documents").find(
+            {
+                title: { $regex: query, $options: "i" }
+            },
+            projection || {}  
+        ).toArray();
+
+        const filtered = results.filter(doc =>
+            !doc.title?.toLowerCase().includes("admin")
+        );
+
+        res.json({ success: true, results: filtered });
+
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+app.post("/level6/getAllRecords", async (req, res) => {
+    try {
+        const docs = await docsDB.collection("documents")
+            .find({ title: { $not: /admin/i } }) 
+            .toArray();
+        res.json({ success: true, results: docs });
+    } catch (err) {
+        res.json({ success: false, message: err.message });
     }
 });

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/search.css">
+</head>
+<body>
+  <main class="container" role="main">
+    <h1>Search</h1>
+    <p>Search for notes</p>
+
+    <form id="searchForm" autocomplete="off">
+      <div class="input-group">
+        <label for="query">Search Query</label>
+        <input id="query" name="query" type="text" placeholder="search term" required />
+      </div>
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="result"></div>
+  </main>
+
+  <script>
+    const resultEl = document.getElementById('result');
+
+    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultEl.innerHTML = '';
+
+      const query = document.getElementById('query').value;
+
+
+      try {
+        const resp = await fetch('/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+                query: query,            
+                projection: {} 
+            })
+        });
+
+        const data = await resp.json();
+        const container = document.createElement('div');
+
+        const hdr = document.createElement('div');
+        hdr.innerHTML = `<strong>${data.success ? 'RESULTS' : 'FAILED'}</strong>`;
+        hdr.className = data.success ? 'success' : 'failed';
+        container.appendChild(hdr);
+
+        if (data.success && Array.isArray(data.results)) {
+          if (data.results.length === 0) {
+            container.innerHTML += `<p style="text-align:start;color:#94a3b8;">No results found</p>`;
+          }
+
+          data.results.forEach(doc => {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.innerHTML = `
+              <h3>📄 ${doc.title}</h3>
+              <p>${doc.content}</p>
+            `;
+            container.appendChild(card);
+          });
+
+        } else {
+          container.innerHTML += `<pre>${data.message}</pre>`;
+        }
+
+        resultEl.appendChild(container);
+
+      } catch (err) {
+        resultEl.innerHTML = `<div class="result failed"><pre>Network error or invalid response</pre></div>`;
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      resultEl.innerHTML = '';
+
+      try {
+        const resp = await fetch('/level6/getAllRecords', {method: 'POST'});
+
+        const data = await resp.json();
+        const container = document.createElement('div');
+
+        const hdr = document.createElement('div');
+        hdr.innerHTML = `<strong>${data.success ? 'RESULTS' : 'FAILED'}</strong>`;
+        hdr.className = data.success ? 'success' : 'failed';
+        container.appendChild(hdr);
+
+        if (data.success && Array.isArray(data.results)) {
+          if (data.results.length === 0) {
+            container.innerHTML += `<p style="text-align:start;color:#94a3b8;">No results found</p>`;
+          }
+
+          data.results.forEach(doc => {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.innerHTML = `
+              <h3>📄 ${doc.title}</h3>
+              <p>${doc.content}</p>
+            `;
+            container.appendChild(card);
+          });
+
+        } else {
+          container.innerHTML += `<pre>${data.message}</pre>`;
+        }
+
+        resultEl.appendChild(container);
+
+      } catch (err) {
+        resultEl.innerHTML = `<div class="result failed"><pre>Network error or invalid response</pre></div>`;
+      }
+    });
+  </script>
+</body>
+</html>
